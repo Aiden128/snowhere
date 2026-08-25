@@ -32,22 +32,7 @@
 </div>
 
 <div id="official-view" class="official-view">
-  <div id="om-empty" class="om-empty">
-    <div class="om-card">
-      <h2>把你的位置疊在<b>官方雪場地圖</b>上</h2>
-      <ol>
-        <li>拍下或截圖雪場的官方地圖（纜車站的告示牌、雪場手冊都行）</li>
-        <li>站在一個好認的位置（例：售票口），在地圖上點一下你站的地方</li>
-        <li>滑到雪場另一端，再點一次——完成校準，之後你的位置即時顯示在地圖上</li>
-      </ol>
-      <p class="om-note">圖片只存在你的手機（IndexedDB），不上傳、不散佈——請尊重雪場著作權，僅供個人導航使用。</p>
-      <input id="om-file" type="file" accept="image/*" capture="environment" hidden>
-      <button id="btn-om-pick" class="loc-btn" type="button">🖼️ 選擇官方地圖圖片</button>
-      <button id="btn-om-load" class="ghost-btn" type="button" hidden>載入上次校準的地圖</button>
-    </div>
-  </div>
-
-  <div id="om-stage" class="om-stage" hidden>
+  <div id="om-stage" class="om-stage">
     <canvas id="om-canvas"></canvas>
     <div id="om-wizard" class="om-wizard" hidden>
       <p class="om-wiz-step num" id="om-wiz-step">校準 1 / 2</p>

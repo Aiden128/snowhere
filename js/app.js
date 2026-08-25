@@ -242,7 +242,6 @@ function setMode(mode) {
   document.querySelector('.search-box').hidden = official;
   document.getElementById('hud').hidden = official || !$('hud-coord').textContent.includes(',');
   if (official && window.OfficialMap) {
-    if (!window.__omInited) { window.__omInited = true; OfficialMap.init(); }
     requestAnimationFrame(() => OfficialMap.redraw());
     OfficialMap.onGps(lastFix ? { lat: lastFix.lat, lng: lastFix.lng } : track.length ? track[track.length - 1] : null, track);
   }
@@ -252,5 +251,5 @@ function setMode(mode) {
 tabOfficial.addEventListener('click', () => setMode('official'));
 tabOsm.addEventListener('click', () => setMode('osm'));
 
-const savedMode = localStorage.getItem('snowhere-mode');
-if (savedMode === 'official') setMode('official');
+if (window.OfficialMap) { window.__omInited = true; OfficialMap.init(); }
+setMode(localStorage.getItem('snowhere-mode') || 'official');

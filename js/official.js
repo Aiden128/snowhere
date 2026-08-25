@@ -235,8 +235,6 @@ const OfficialMap = (() => {
     if (m.seed) {
       calib = { mode: 'poly2', cx: m.seed.c, dy: m.seed.d };
     }
-    $('om-empty').hidden = true;
-    $('om-stage').hidden = false;
     fitCanvas();
     view = fitToScreen();
     refit();
@@ -267,18 +265,7 @@ const OfficialMap = (() => {
     picker.addEventListener('change', () => loadMap(manifest.find((m) => m.id === picker.value)));
     document.querySelector('.om-stage').prepend(picker);
 
-    $('btn-om-pick').addEventListener('click', () => $('om-file').click());
-    $('om-file').addEventListener('change', (e) => {
-      const f = e.target.files[0];
-      if (!f) return;
-      toast('自帶圖片模式開發中——請先使用內建地圖');
-    });
-    $('btn-om-load').addEventListener('click', () => {});
     $('btn-om-recal').addEventListener('click', () => setCalibrating(true));
-    $('btn-om-change').addEventListener('click', () => {
-      $('om-stage').hidden = true;
-      $('om-empty').hidden = false;
-    });
     $('om-wiz-cancel').addEventListener('click', () => setCalibrating(false));
 
     const saved = localStorage.getItem('snowhere-last-map');
@@ -304,3 +291,4 @@ const OfficialMap = (() => {
   };
 })();
 window.OfficialMap = OfficialMap;
+OfficialMap.init();
