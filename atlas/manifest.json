@@ -1,0 +1,91 @@
+[
+ {
+  "id": "hirafu",
+  "name": "Grand Hirafu（新雪谷）",
+  "file": "hirafu.jpg",
+  "w": 3000,
+  "h": 2134,
+  "seed": {
+   "mode": "poly2",
+   "c": [
+    137606008825.77945,
+    -1005079966.043917,
+    -1649979850.700985,
+    -1600032.7794,
+    4627201.354552,
+    8118988.946214
+   ],
+   "d": [
+    98107204857.26678,
+    152069416.796566,
+    -1441013949.749601,
+    -10201420.49126,
+    4339224.563108,
+    5134674.365584
+   ]
+  }
+ },
+ {
+  "id": "niseko-united",
+  "name": "Niseko United 全區",
+  "file": "niseko-united.jpg",
+  "w": 3000,
+  "h": 2168
+ },
+ {
+  "id": "rusutsu",
+  "name": "留壽都 Rusutsu",
+  "file": "rusutsu.jpg",
+  "w": 686,
+  "h": 458
+ },
+ {
+  "id": "kiroro",
+  "name": "喜樂樂 Kiroro",
+  "file": "kiroro.jpg",
+  "w": 3000,
+  "h": 2114
+ },
+ {
+  "id": "teine",
+  "name": "札幌手稻 Teine",
+  "file": "teine.jpg",
+  "w": 2820,
+  "h": 3000
+ },
+ {
+  "id": "kokusai",
+  "name": "札幌國際 Kokusai",
+  "file": "kokusai-p1.jpg",
+  "w": 3000,
+  "h": 2143
+ },
+ {
+  "id": "zao",
+  "name": "藏王溫泉 Zao",
+  "file": "zao.jpg",
+  "w": 3000,
+  "h": 2597
+ },
+ {
+  "id": "appi",
+  "name": "安比高原 Appi",
+  "file": "appi.jpg",
+  "w": 3000,
+  "h": 2124
+ },
+ {
+  "id": "nekoma-s",
+  "name": "貓魔南區（Alts）",
+  "file": "nekoma-s.jpg",
+  "w": 1160,
+  "h": 900
+ },
+ {
+  "id": "nekoma-n",
+  "name": "貓魔北區（Nekoma）",
+  "file": "nekoma-n.jpg",
+  "w": 1160,
+  "h": 900
+ }
+]

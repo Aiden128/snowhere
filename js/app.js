@@ -20,6 +20,7 @@ L.control.layers({
 }, null, { position: 'topright' }).addTo(map);
 
 const $ = (id) => document.getElementById(id);
+window.toast = toast;
 const toastEl = $('toast');
 let toastTimer;
 function toast(msg, isErr = false) {
@@ -135,6 +136,7 @@ function onFix(pos) {
 
   detectResort(lat, lng);
   pushTrack(lat, lng, accuracy);
+  if (window.OfficialMap) OfficialMap.onGps({ lat, lng, acc: accuracy }, track);
 
   if (firstFix) {
     firstFix = false;
@@ -224,3 +226,31 @@ searchEl.addEventListener('input', () => {
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.search-box')) resultsEl.hidden = true;
 });
+
+const tabOfficial = document.getElementById('tab-official');
+const tabOsm = document.getElementById('tab-osm');
+
+function setMode(mode) {
+  const official = mode === 'official';
+  tabOfficial.classList.toggle('is-active', official);
+  tabOsm.classList.toggle('is-active', !official);
+  tabOfficial.setAttribute('aria-selected', String(official));
+  tabOsm.setAttribute('aria-selected', String(!official));
+  document.getElementById('official-view').hidden = !official;
+  document.getElementById('map').hidden = official;
+  document.querySelector('.map-tools').hidden = official;
+  document.querySelector('.search-box').hidden = official;
+  document.getElementById('hud').hidden = official || !$('hud-coord').textContent.includes(',');
+  if (official && window.OfficialMap) {
+    if (!window.__omInited) { window.__omInited = true; OfficialMap.init(); }
+    requestAnimationFrame(() => OfficialMap.redraw());
+    OfficialMap.onGps(lastFix ? { lat: lastFix.lat, lng: lastFix.lng } : track.length ? track[track.length - 1] : null, track);
+  }
+  localStorage.setItem('snowhere-mode', mode);
+}
+
+tabOfficial.addEventListener('click', () => setMode('official'));
+tabOsm.addEventListener('click', () => setMode('osm'));
+
+const savedMode = localStorage.getItem('snowhere-mode');
+if (savedMode === 'official') setMode('official');
