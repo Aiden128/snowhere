@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>雪裡 SNOWHERE — 我在日本哪個雪場的哪裡？</title>
+<meta name="description" content="GPS 定位你在日本哪個雪場、雪道地圖上哪個位置。真實比例尺、誤差圈、海拔速度、滑行軌跡記錄。">
+<meta name="theme-color" content="#0b0e14">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❄️</text></svg>">
+<link rel="stylesheet" href="/js/vendor/leaflet.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">雪裡 <span class="latin">SNOWHERE</span></div>
+  <button id="btn-loc" class="loc-btn" type="button">📍 開始定位</button>
+</header>
+
+<div id="banner" class="banner" hidden>
+  <div class="banner-main">
+    <p class="banner-label" id="banner-label">你目前在</p>
+    <p class="banner-name" id="banner-name">—</p>
+  </div>
+  <div class="banner-side">
+    <p class="banner-alt"><span class="num" id="hud-alt">—</span> m</p>
+    <p class="banner-spd"><span class="num" id="hud-spd">—</span> km/h</p>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<div class="hud" id="hud" hidden>
+  <span class="hud-item">精度 <span class="num" id="hud-acc">—</span> m</span>
+  <span class="hud-item sep"></span>
+  <span class="hud-item num" id="hud-coord">—</span>
+</div>
+
+<div class="map-tools">
+  <button class="tool" id="btn-track" type="button" title="記錄滑行軌跡">⬤ 記錄軌跡</button>
+  <button class="tool" id="btn-clear" type="button" title="清除軌跡">✕</button>
+  <button class="tool" id="btn-center" type="button" title="回到我的位置">🎯</button>
+</div>
+
+<div class="search-box">
+  <input id="search" type="search" placeholder="搜尋雪場（例：新雪谷、白馬、藏王…）" autocomplete="off" aria-label="搜尋雪場">
+  <ul id="search-results" class="search-results" hidden></ul>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<footer class="foot">
+  <p>雪場範圍與雪道 © OpenStreetMap 貢獻者（ODbL，212 個雪場偵測區）· 底圖 © OpenStreetMap ／ Esri ／ OpenTopoMap</p>
+  <p class="foot-links">
+    <a href="https://smarternic.com">smarternic.com 系列</a> ·
+    <a href="https://wire.smarternic.com">線速</a> ·
+    <a href="https://nic.smarternic.com">網卡解剖</a> ·
+    <a href="https://invoice.smarternic.com">發票對獎</a> ·
+    <a href="https://hsinchu.smarternic.com">新竹此刻</a>
+  </p>
+</footer>
+
+<script src="/js/vendor/leaflet.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
