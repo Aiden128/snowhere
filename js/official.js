@@ -2,9 +2,6 @@ const OfficialMap = (() => {
   const $ = (id) => document.getElementById(id);
   const canvas = document.getElementById('om-canvas');
   const ctx = canvas.getContext('2d');
-  const wizard = document.getElementById('om-wizard');
-  const wizStep = document.getElementById('om-wiz-step');
-  const wizText = document.getElementById('om-wiz-text');
   const status = document.getElementById('om-status');
 
   let manifest = [];
@@ -12,7 +9,6 @@ const OfficialMap = (() => {
   let img = null;
   let anchors = [];
   let calib = null;
-  let calibrating = false;
   let view = { x: 0, y: 0, scale: 1 };
   let lastGps = null;
   let trackPts = [];
@@ -134,16 +130,6 @@ const OfficialMap = (() => {
         }
       }
     }
-    if (calibrating) {
-      anchors.forEach((a) => {
-        ctx.beginPath();
-        ctx.arc(a.px[0], a.px[1], 7 / view.scale, 0, Math.PI * 2);
-        ctx.fillStyle = '#f5a524';
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2 / view.scale;
-        ctx.fill(); ctx.stroke();
-      });
-    }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
@@ -169,15 +155,6 @@ const OfficialMap = (() => {
   function toast2(msg, isErr) { if (window.toast) window.toast(msg, isErr); }
   let drag = null, pinch = null;
   canvas.addEventListener('pointerdown', (e) => {
-    if (calibrating) {
-      if (!lastGps) { toast2('還沒有 GPS 定位——先按右上角「開始定位」', true); return; }
-      const px = screenToImage(e);
-      anchors.push({ px, gps: [lastGps.lat, lastGps.lng] });
-      updateWizard();
-      refit();
-      if (anchors.length >= (calib ? 7 : 2)) setCalibrating(false);
-      return;
-    }
     drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y };
     canvas.setPointerCapture(e.pointerId);
   });
@@ -199,48 +176,25 @@ const OfficialMap = (() => {
     draw();
   }, { passive: false });
 
-  function updateWizard() {
-    const n = anchors.length;
-    if (n === 0) { wizStep.textContent = '校準 1 / 2'; wizText.innerHTML = '站定在一個好認的位置，<b>點地圖上你所在的位置</b>。'; }
-    else if (n === 1) { wizStep.textContent = '校準 2 / 2'; wizText.innerHTML = '很好！移動到<b>雪場另一端</b>（越遠越準），再點一次。'; }
-    else { wizStep.textContent = `已記錄 ${n} 個校正點`; wizText.innerHTML = '繼續點擊可再精修（點越多越準），或按「完成」結束校準。';
-      if (!document.getElementById('om-wiz-done')) {
-        const b = document.createElement('button');
-        b.id = 'om-wiz-done'; b.className = 'ghost-btn'; b.textContent = '完成';
-        b.onclick = () => setCalibrating(false);
-        document.querySelector('.om-wiz-row').appendChild(b);
-      }
-    }
-  }
-
-  function setCalibrating(on) {
-    calibrating = on;
-    wizard.hidden = !on;
-    if (on) { anchors = []; refit(); updateWizard(); }
-    else {
-      const done = document.getElementById('om-wiz-done');
-      if (done) done.remove();
-      if (anchors.length >= 2) toast(`校準完成——已記錄 ${anchors.length} 個校正點`);
-    }
-  }
-
   async function loadMap(m) {
     current = m;
     img = new Image();
     img.src = `/atlas/${m.file}`;
     await img.decode();
-    anchors = [];
-    try { anchors = JSON.parse(localStorage.getItem('snowhere-anchors-' + m.id) || '[]'); } catch {}
-    calib = null;
-    if (m.seed) {
+    if (m.seed && m.seed.mode === 'auto') {
+      anchors = m.seed.anchors;
+      calib = fitModel(anchors);
+    } else if (m.seed) {
+      anchors = [];
       calib = { mode: 'poly2', cx: m.seed.c, dy: m.seed.d };
+    } else {
+      anchors = [];
+      calib = null;
     }
     fitCanvas();
     view = fitToScreen();
     refit();
-    status.textContent = m.seed
-      ? `${m.name} · 內建概略校準（誤差可能 100-300m）——按 🎯 兩點校準可精修`
-      : `${m.name} · 尚未校準——按 🎯 開始兩點校準`;
+    status.textContent = `${m.name} · 內建校準（3D 手繪圖誤差約 50-300m，精確定位請切「精準地圖」）`;
     status.hidden = false;
     draw();
   }
@@ -265,13 +219,12 @@ const OfficialMap = (() => {
     picker.addEventListener('change', () => loadMap(manifest.find((m) => m.id === picker.value)));
     document.querySelector('.om-stage').prepend(picker);
 
-    $('btn-om-recal').addEventListener('click', () => setCalibrating(true));
-    $('om-wiz-cancel').addEventListener('click', () => setCalibrating(false));
 
     const saved = localStorage.getItem('snowhere-last-map');
     const first = manifest.find((m) => m.id === saved) || manifest[0];
     picker.value = first.id;
     await loadMap(first);
+    draw();
   }
 
   function redraw() { fitCanvas(); if (img) { if (!view.scale || view.scale === 1) view = fitToScreen(); draw(); } }
