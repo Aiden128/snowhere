@@ -26,11 +26,11 @@ const OfficialMap = (() => {
     if (!calib) return null;
     if (calib.mode === 'tps-loading') return [0, 0];
     if (calib.mode === 'tps') {
-      const ref = calib.ref;
-      const mx = (lng - ref[1]) * 111320;
-      const my = -(lat - ref[0]) * 110540;
+      const ref = calib.ref, SC = calib.scale || 5000;
+      const mx = ((lng - ref[1]) * 111320) / SC;
+      const my = (-(lat - ref[0]) * 110540) / SC;
       let rx = 0, ry = 0;
-      const C = calib.ctrl, W = calib.W, n = C.length;
+      const C = calib.ctrlN, W = calib.W, n = C.length;
       for (let i = 0; i < n; i++) {
         const dx = mx - C[i][0], dy = my - C[i][1];
         const u = (dx * dx + dy * dy) * Math.log(Math.sqrt(dx * dx + dy * dy) + 1e-9);
@@ -218,14 +218,12 @@ const OfficialMap = (() => {
     await img.decode();
     if (m.seed && m.seed.mode === 'tps') {
       anchors = [];
-      calib = { mode: 'tps-loading', ref: m.seed.ref };
+      calib = { mode: 'tps-loading', ref: [38.14, 140.42] };
       fetch(m.seed.file).then((r) => r.json()).then((tp) => {
-        calib = { mode: 'tps', ref: tp.ref, ctrl: tp.ctrl.map((c) => [(c[0] - tp.ref[1]) * 111320 * Math.cos(tp.ref[0] * Math.PI / 180), -(c[0] - tp.ref[0]) * 110540]), W: tp.w };
+        const sc = tp.scale || 5000;
+        calib = { mode: 'tps', ref: tp.ref, scale: sc, lam: tp.lam || 0.05, ctrlN: tp.ctrl.map((c) => [c[0] / sc, c[1] / sc]), W: tp.w };
         draw();
       });
-    } else if (m.seed && m.seed.mode === 'auto') {
-      anchors = [];
-      calib = { mode: 'zones', ref: m.seed.ref, zones: m.seed.zones };
     } else if (m.seed && m.seed.mode === 'auto') {
       anchors = m.seed.anchors;
       calib = fitModel(anchors);
