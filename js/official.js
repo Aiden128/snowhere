@@ -24,6 +24,22 @@ const OfficialMap = (() => {
 
   function imgFromGps(lat, lng) {
     if (!calib) return null;
+    if (calib.mode === 'tps-loading') return [0, 0];
+    if (calib.mode === 'tps') {
+      const ref = calib.ref;
+      const mx = (lng - ref[1]) * 111320 * Math.cos(ref[0] * Math.PI / 180);
+      const my = -(lat - ref[0]) * 110540;
+      let rx = 0, ry = 0;
+      const C = calib.ctrl, W = calib.W, n = C.length;
+      for (let i = 0; i < n; i++) {
+        const dx = mx - C[i][0], dy = my - C[i][1];
+        const u = (dx * dx + dy * dy) * Math.log(Math.sqrt(dx * dx + dy * dy) + 1e-9);
+        rx += W[i][0] * u; ry += W[i][1] * u;
+      }
+      const ax = W[n][0] + W[n + 1][0] * mx + W[n + 2][0] * my;
+      const ay = W[n][1] + W[n + 1][1] * mx + W[n + 2][1] * my;
+      return [ax + rx, ay + ry];
+    }
     if (calib.mode === 'zones') {
       const ref = calib.ref;
       const m = [(lng - ref[1]) * 111320 * Math.cos(ref[0] * Math.PI / 180), -(lat - ref[0]) * 110540];
@@ -200,7 +216,14 @@ const OfficialMap = (() => {
     img = new Image();
     img.src = `/atlas/${m.file}`;
     await img.decode();
-    if (m.seed && m.seed.mode === 'zones') {
+    if (m.seed && m.seed.mode === 'tps') {
+      anchors = [];
+      calib = { mode: 'tps-loading', ref: m.seed.ref };
+      fetch(m.seed.file).then((r) => r.json()).then((tp) => {
+        calib = { mode: 'tps', ref: tp.ref, ctrl: tp.ctrl.map((c) => [(c[0] - tp.ref[1]) * 111320 * Math.cos(tp.ref[0] * Math.PI / 180), -(c[0] - tp.ref[0]) * 110540]), W: tp.w };
+        draw();
+      });
+    } else if (m.seed && m.seed.mode === 'auto') {
       anchors = [];
       calib = { mode: 'zones', ref: m.seed.ref, zones: m.seed.zones };
     } else if (m.seed && m.seed.mode === 'auto') {
