@@ -27,7 +27,7 @@ const OfficialMap = (() => {
     if (calib.mode === 'tps-loading') return [0, 0];
     if (calib.mode === 'tps') {
       const ref = calib.ref;
-      const mx = (lng - ref[1]) * 111320 * Math.cos(ref[0] * Math.PI / 180);
+      const mx = (lng - ref[1]) * 111320;
       const my = -(lat - ref[0]) * 110540;
       let rx = 0, ry = 0;
       const C = calib.ctrl, W = calib.W, n = C.length;
