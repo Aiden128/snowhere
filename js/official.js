@@ -78,16 +78,25 @@ const OfficialMap = (() => {
   function fitModel(anchors) {
     if (anchors.length < 2) return null;
     if (anchors.length < 6) {
-      const [a, b] = anchors;
-      const ref = a.gps;
-      const m0 = toMeters(a.gps[0], a.gps[1], ref);
-      const m1 = toMeters(b.gps[0], b.gps[1], ref);
-      const vImg = [b.px[0] - a.px[0], b.px[1] - a.px[1]];
-      const vMet = [m1[0] - m0[0], m1[1] - m0[1]];
-      const s = Math.hypot(...vImg) / (Math.hypot(...vMet) || 1);
-      const th = Math.atan2(vImg[1], vImg[0]) - Math.atan2(vMet[1], vMet[0]);
-      const ox = a.px[0] - s * (Math.cos(th) * m0[0] - Math.sin(th) * m0[1]);
-      const oy = a.px[1] - s * (Math.sin(th) * m0[0] + Math.cos(th) * m0[1]);
+      const n = anchors.length;
+      const ref = [anchors.reduce((t, a) => t + a.gps[0], 0) / n,
+                   anchors.reduce((t, a) => t + a.gps[1], 0) / n];
+      const m = anchors.map((a) => toMeters(a.gps[0], a.gps[1], ref));
+      const mm = [m.reduce((t, v) => t + v[0], 0) / n, m.reduce((t, v) => t + v[1], 0) / n];
+      const p = anchors.map((a) => a.px);
+      const mp = [p.reduce((t, v) => t + v[0], 0) / n, p.reduce((t, v) => t + v[1], 0) / n];
+      let a1 = 0, b1 = 0, norm = 0;
+      for (let i = 0; i < n; i++) {
+        const mx = m[i][0] - mm[0], my = m[i][1] - mm[1];
+        const px = p[i][0] - mp[0], py = p[i][1] - mp[1];
+        a1 += mx * px + my * py;
+        b1 += mx * py - my * px;
+        norm += mx * mx + my * my;
+      }
+      const th = Math.atan2(b1, a1);
+      const s = Math.sqrt(a1 * a1 + b1 * b1) / (norm || 1);
+      const ox = mp[0] - s * (Math.cos(th) * mm[0] - Math.sin(th) * mm[1]);
+      const oy = mp[1] - s * (Math.sin(th) * mm[0] + Math.cos(th) * mm[1]);
       return { mode: 'sim', s, th, ox, oy, ref };
     }
     const A = anchors.map((a) => [1, a.gps[0], a.gps[1], a.gps[0] ** 2, a.gps[1] ** 2, a.gps[0] * a.gps[1]]);
