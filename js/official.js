@@ -24,6 +24,21 @@ const OfficialMap = (() => {
 
   function imgFromGps(lat, lng) {
     if (!calib) return null;
+    if (calib.mode === 'zones') {
+      const ref = calib.ref;
+      const m = [(lng - ref[1]) * 111320 * Math.cos(ref[0] * Math.PI / 180), -(lat - ref[0]) * 110540];
+      let wx = 0, wy = 0, wsum = 0;
+      for (const z of calib.zones) {
+        const { s, th, ox, oy } = z.params;
+        const c = Math.cos(th), si = Math.sin(th);
+        const px = ox + s * (c * m[0] - si * m[1]);
+        const py = oy + s * (si * m[0] + c * m[1]);
+        const d2 = (px - z.center[0]) ** 2 + (py - z.center[1]) ** 2;
+        const w = 1 / (d2 + 250000);
+        wx += px * w; wy += py * w; wsum += w;
+      }
+      return [wx / wsum, wy / wsum];
+    }
     if (calib.mode === 'affine') {
       return [calib.cx[0] + calib.cx[1] * lat + calib.cx[2] * lng,
               calib.cy[0] + calib.cy[1] * lat + calib.cy[2] * lng];
@@ -185,7 +200,10 @@ const OfficialMap = (() => {
     img = new Image();
     img.src = `/atlas/${m.file}`;
     await img.decode();
-    if (m.seed && m.seed.mode === 'auto') {
+    if (m.seed && m.seed.mode === 'zones') {
+      anchors = [];
+      calib = { mode: 'zones', ref: m.seed.ref, zones: m.seed.zones };
+    } else if (m.seed && m.seed.mode === 'auto') {
       anchors = m.seed.anchors;
       calib = fitModel(anchors);
     } else if (m.seed && m.seed.mode === 'affine') {
