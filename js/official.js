@@ -24,6 +24,10 @@ const OfficialMap = (() => {
 
   function imgFromGps(lat, lng) {
     if (!calib) return null;
+    if (calib.mode === 'affine') {
+      return [calib.cx[0] + calib.cx[1] * lat + calib.cx[2] * lng,
+              calib.cy[0] + calib.cy[1] * lat + calib.cy[2] * lng];
+    }
     if (calib.mode === 'sim') {
       const { s, th, ox, oy } = calib;
       const m = toMeters(lat, lng, calib.ref);
@@ -184,6 +188,9 @@ const OfficialMap = (() => {
     if (m.seed && m.seed.mode === 'auto') {
       anchors = m.seed.anchors;
       calib = fitModel(anchors);
+    } else if (m.seed && m.seed.mode === 'affine') {
+      anchors = [];
+      calib = { mode: 'affine', cx: m.seed.cx, cy: m.seed.cy };
     } else if (m.seed) {
       anchors = [];
       calib = { mode: 'poly2', cx: m.seed.c, dy: m.seed.d };
